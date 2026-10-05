@@ -1,0 +1,13 @@
+target/
+.m2/
+.runtime/
+tmp/
+.env
+.env.*
+!.env.example
+config/*.local.ps1
+*.log
+.idea/
+.vscode/
+*.iml
+~$*.docx

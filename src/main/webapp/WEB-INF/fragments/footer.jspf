@@ -1,0 +1,5 @@
+<%@ page pageEncoding="UTF-8" %>
+<footer class="site-footer"><div class="container footer-inner">
+    <span class="footer-brand">HNHBOOKSTORE</span>
+    <span>Hoàng Ngọc Huy — 24133023 — Đề 02</span>
+</div></footer>
