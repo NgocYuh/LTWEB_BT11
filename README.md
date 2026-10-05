@@ -84,6 +84,7 @@ sqlcmd -S localhost -E -C -d HNHBOOKSTORE -i .\sql\01-schema.sql
 sqlcmd -S localhost -E -C -d HNHBOOKSTORE -i .\sql\02-seed-catalog.sql
 sqlcmd -S localhost -E -C -d HNHBOOKSTORE -i .\sql\03-alter-users-auth.sql
 sqlcmd -S localhost -E -C -d HNHBOOKSTORE -i .\sql\04-seed-cau3.sql
+sqlcmd -S localhost -E -C -d HNHBOOKSTORE -i .\sql\06-create-orders-schema.sql
 ```
 
 ### Bước 2: Biên dịch và Đóng gói WAR
@@ -126,3 +127,28 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Start-Local.ps1
 - **Câu 6 (3.0 điểm):** Quản lý kho sách (CRUD) cho Admin tại `/admin/books` có phân trang 10 sách/trang (hỗ trợ kiểm thử 10/10/1 với 21 cuốn sách). Form thêm mới và sửa sách có dropdown chọn tác giả từ bảng `author` và lưu vào `book_author`. Chức năng xóa sách an toàn xử lý bằng Transaction 3 bước (xóa rating &rarr; xóa book_author &rarr; xóa books), cam kết không bao giờ phát sinh lỗi khóa ngoại (Foreign Key).
 
 *(Ghi chú: Đề thi không có Câu 5).*
+
+---
+
+## 7. Các chức năng mở rộng phát triển thêm
+
+### 1. Chức năng Giỏ hàng (Shopping Cart):
+- Quản lý giỏ hàng an toàn theo Session (`Cart_24133023`, `CartItem_24133023`).
+- Thêm sách vào giỏ hàng trực tiếp từ Trang chủ hoặc Trang chi tiết sách.
+- Điều chỉnh số lượng tăng/giảm trong giỏ hàng với giới hạn kiểm tra tự động theo tồn kho thực tế (`quantity` trong CSDL).
+- Xóa từng cuốn sách hoặc làm trống toàn bộ giỏ hàng.
+- Hiển thị huy hiệu số lượng sách trên thanh điều hướng Header động.
+- Tính tự động thành tiền và tổng thanh toán.
+
+### 2. Chức năng Thanh toán đơn hàng bằng COD (Cash On Delivery):
+- Yêu cầu đăng nhập trước khi thanh toán (chuyển hướng an toàn đến trang đăng nhập kèm thông báo).
+- Form điền thông tin người nhận: Họ tên, số điện thoại giao hàng (kiểm tra định dạng SĐT Việt Nam), địa chỉ nhận hàng chi tiết và ghi chú giao hàng.
+- Xử lý giao dịch đặt hàng nguyên tử (Transaction JDBC ACID):
+  1. Kiểm tra tồn kho thời gian thực của từng đầu sách.
+  2. Tạo đơn hàng trong bảng `dbo.orders` với phương thức `COD` và trạng thái `PENDING`.
+  3. Lưu chi tiết sản phẩm vào bảng `dbo.order_details`.
+  4. Trừ số lượng tồn kho tự động trong bảng `dbo.books`.
+  5. Rollback toàn bộ nếu có bất kỳ lỗi nào hoặc số lượng tồn kho không đủ.
+- Xóa sạch giỏ hàng khi đặt hàng thành công và chuyển hướng đến trang xác nhận đơn hàng `/checkout/success?orderId=...`.
+- Trang xác nhận đơn hàng hiển thị đầy đủ thông tin: Mã đơn hàng, người nhận, địa chỉ, số điện thoại, bảng chi tiết từng cuốn sách, tổng tiền thanh toán và hướng dẫn đồng kiểm hàng khi nhận.
+
