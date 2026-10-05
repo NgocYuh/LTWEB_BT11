@@ -74,6 +74,37 @@
                     <p><c:out value="${book.description}"/></p>
                 </div>
             </c:if>
+
+            <div class="cart-action-box" style="margin-top: 24px; padding: 20px; background: #F8FAFC; border: 1px solid var(--line); border-radius: 10px;">
+                <c:choose>
+                    <c:when test="${book.quantity != null && book.quantity > 0}">
+                        <form method="post" action="${pageContext.request.contextPath}/cart/add" style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <input type="hidden" name="bookId" value="${book.bookid}">
+                            <input type="hidden" name="returnUrl" value="${pageContext.request.contextPath}/books/detail?bookId=${book.bookid}">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label for="detail-qty" style="font-weight: 600; font-size: 14px;">Số lượng:</label>
+                                <input type="number" id="detail-qty" name="quantity" value="1" min="1" max="${book.quantity}" class="form-input" style="width: 80px; text-align: center; padding: 7px;">
+                            </div>
+                            <button type="submit" class="button button-primary" style="padding: 10px 24px; font-size: 15px;">
+                                🛒 Thêm vào giỏ hàng
+                            </button>
+                            <a href="${pageContext.request.contextPath}/cart" class="button button-outline" style="padding: 10px 18px;">
+                                Xem giỏ hàng
+                            </a>
+                        </form>
+                        <c:if test="${param.cart_msg == 'added'}">
+                            <div class="alert alert-success" style="margin-top: 14px; margin-bottom: 0; padding: 10px 16px;">
+                                ✓ Đã thêm sách vào giỏ hàng thành công! <a href="${pageContext.request.contextPath}/cart" style="font-weight: 700; text-decoration: underline;">Mở giỏ hàng</a>
+                            </div>
+                        </c:if>
+                    </c:when>
+                    <c:otherwise>
+                        <div style="color: var(--danger); font-weight: 700; font-size: 15px;">
+                            ⚠ Cuốn sách này hiện đã tạm hết hàng trong kho.
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
     </section>
 

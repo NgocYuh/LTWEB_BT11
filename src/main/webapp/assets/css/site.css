@@ -76,4 +76,17 @@
 .text-danger{color:var(--danger);font-weight:700}
 @media(max-width:768px){.admin-header-row{flex-direction:column}.form-grid-2{grid-template-columns:1fr}.admin-pagination{flex-direction:column;gap:14px}}
 
+/* --- Shopping Cart Styles --- */
+.badge-cart{display:inline-flex;align-items:center;justify-content:center;background:var(--orange);color:#FFF;font-size:11px;font-weight:700;border-radius:10px;min-width:18px;height:18px;padding-inline:5px;margin-left:4px;vertical-align:middle}
+.cart-layout{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:flex-start}
+.cart-summary-card{padding:26px;position:sticky;top:24px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px}
+.qty-control{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#FFF}
+.qty-btn{border:none;background:#F1F5F9;color:var(--slate);font-weight:700;width:30px;height:32px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.qty-btn:hover:not(:disabled){background:#E2E8F0}
+.qty-btn:disabled{opacity:.4;cursor:not-allowed}
+.qty-input{width:46px;height:32px;border:none;text-align:center;font-weight:600;font-size:14px;-moz-appearance:textfield}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+@media(max-width:960px){.cart-layout{grid-template-columns:1fr}}
+
 

@@ -60,11 +60,24 @@
                                     </div>
                                     <div class="book-card-footer">
                                         <span class="reviews-badge">Reviews (<c:out value="${book.reviewsCount}"/>)</span>
-                                        <a class="button button-outline btn-sm"
-                                           href="${pageContext.request.contextPath}/books/detail?bookId=${book.bookid}">
-                                            Xem chi tiết
-                                        </a>
+                                        <div style="display: flex; gap: 6px;">
+                                            <c:if test="${book.quantity != null && book.quantity > 0}">
+                                                <form method="post" action="${pageContext.request.contextPath}/cart/add" class="inline-form">
+                                                    <input type="hidden" name="bookId" value="${book.bookid}">
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <input type="hidden" name="returnUrl" value="${pageContext.request.contextPath}/home#author-${group.author.authorId}">
+                                                    <button type="submit" class="button button-primary btn-sm" title="Thêm 1 cuốn vào giỏ hàng">
+                                                        + Giỏ
+                                                    </button>
+                                                </form>
+                                            </c:if>
+                                            <a class="button button-outline btn-sm"
+                                               href="${pageContext.request.contextPath}/books/detail?bookId=${book.bookid}">
+                                                Chi tiết
+                                            </a>
+                                        </div>
                                     </div>
+
                                 </div>
                             </article>
                         </c:forEach>

@@ -6,6 +6,9 @@
         <nav aria-label="Điều hướng chính">
             <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
             <a href="${pageContext.request.contextPath}/home#catalog">Sản phẩm</a>
+            <a href="${pageContext.request.contextPath}/cart" class="cart-nav-link">
+                Giỏ hàng <c:if test="${not empty sessionScope.cart && sessionScope.cart.totalQuantity > 0}"><span class="badge-cart">${sessionScope.cart.totalQuantity}</span></c:if>
+            </a>
             <c:if test="${sessionScope.currentUser.admin}"><a href="${pageContext.request.contextPath}/admin/books">Trang quản trị</a></c:if>
             <c:choose>
                 <c:when test="${not empty sessionScope.currentUser}">
