@@ -53,21 +53,23 @@ HNHBOOKSTORE/
 │   ├── 02-seed-catalog.sql                  # Dữ liệu sách và tác giả ban đầu
 │   ├── 03-alter-users-auth.sql              # Bổ sung cột is_verified, password_salt và tài khoản mẫu
 │   ├── 04-seed-cau3.sql                     # Dữ liệu phân trang tác giả và reviews mẫu
-│   └── 05-seed-cau6.sql                     # Dữ liệu kiểm thử phân trang Admin (10/10/1)
+│   ├── 05-seed-cau6.sql                     # Dữ liệu kiểm thử phân trang Admin (10/10/1)
+│   ├── 06-create-orders-schema.sql          # Bảng đơn hàng (orders) và chi tiết (order_details)
+│   └── 07-test-order-statuses.sql           # Dữ liệu kiểm thử 8 trạng thái đơn hàng
 ├── src/main/java/vn/hcmute/hnhbookstore/
-│   ├── model/                               # Tầng Model: Author, Book, Rating, User, OtpSessionData...
-│   ├── data/                                # Tầng Data Access: ConnectionFactory, AuthorDao, BookDao, RatingDao, UserDao
-│   ├── business/                            # Tầng Business Logic: AuthService, CatalogService, SmtpMailService...
-│   ├── presentation/controller/             # Tầng Controller (Servlet): Home, BookDetail, Admin, Login, Logout, Register, VerifyOtp
-│   ├── presentation/filter/                 # Tầng Filter: EncodingFilter (UTF-8), SiteMeshFilter, AdminAuthFilter (Bảo vệ /admin/*)
-│   └── util/                                # Utilities: PasswordUtil (PBKDF2/SHA-256), CsrfUtil (Token CSRF)
+│   ├── model/                               # Tầng Model: Author, Book, Rating, User, Cart, Order...
+│   ├── data/                                # Tầng Data Access: ConnectionFactory, BookDao, OrderDao...
+│   ├── business/                            # Tầng Business Logic: AuthService, CatalogService...
+│   ├── presentation/controller/             # Tầng Controller (Servlet): Home, Cart, Checkout, OrderHistory...
+│   ├── presentation/filter/                 # Tầng Filter: EncodingFilter, SiteMeshFilter, AdminAuthFilter
+│   └── util/                                # Utilities: PasswordUtil (PBKDF2/SHA-256), CsrfUtil
 ├── src/main/webapp/
 │   ├── assets/                              # CSS (site.css), JavaScript, hình ảnh SVG
 │   └── WEB-INF/
 │       ├── web.xml                          # Khai báo Filters, Session-config, Error pages, UTF-8
 │       ├── decorators/                      # Layout user.jsp và admin.jsp
 │       ├── fragments/                       # header.jspf (menu động), footer.jspf (bản quyền)
-│       └── views/                           # Các giao diện JSP (home, detail, admin, auth, error)
+│       └── views/                           # Các giao diện JSP (home, cart, checkout, orders, admin...)
 └── scripts/                                 # Các script hỗ trợ kiểm tra và khởi động ứng dụng
 ```
 
@@ -150,5 +152,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Start-Local.ps1
   4. Trừ số lượng tồn kho tự động trong bảng `dbo.books`.
   5. Rollback toàn bộ nếu có bất kỳ lỗi nào hoặc số lượng tồn kho không đủ.
 - Xóa sạch giỏ hàng khi đặt hàng thành công và chuyển hướng đến trang xác nhận đơn hàng `/checkout/success?orderId=...`.
-- Trang xác nhận đơn hàng hiển thị đầy đủ thông tin: Mã đơn hàng, người nhận, địa chỉ, số điện thoại, bảng chi tiết từng cuốn sách, tổng tiền thanh toán và hướng dẫn đồng kiểm hàng khi nhận.
+### 3. Chức năng Lịch sử đặt hàng lọc theo 8 trạng thái:
+- Đường dẫn: `/orders` (hoặc `/orders/history`), hiển thị trên thanh điều hướng Header khi đã đăng nhập.
+- Hỗ trợ thanh lọc 8 trạng thái đơn hàng (kèm số lượng đếm tự động trên từng tab):
+  1. **Tất cả** (`ALL`)
+  2. **Đơn hàng mới** (`NEW` / `PENDING`)
+  3. **Đã xác nhận** (`CONFIRMED`)
+  4. **Chuẩn bị hàng** (`PREPARING`)
+  5. **Vận chuyển** (`SHIPPING`)
+  6. **Giao hàng** (`DELIVERING`)
+  7. **Đã giao** (`DELIVERED`)
+  8. **Đơn hàng hủy** (`CANCELLED`)
+  9. **Đơn hàng hoàn** (`RETURNED`)
+- Mỗi thẻ đơn hàng hiển thị trực quan: Mã đơn hàng, thời gian đặt, trạng thái kèm huy hiệu màu riêng biệt, danh sách sách với ảnh bìa thumbnail, đơn giá, số lượng, thành tiền, thông tin người nhận, địa chỉ giao hàng và nút xem biên lai chi tiết.
+- Chuẩn hóa trạng thái linh hoạt: Tự động nhận diện cả mã tiếng Anh (`PENDING`, `CONFIRMED`, `SHIPPING`...) lẫn tiếng Việt (`Đã xác nhận`, `Vận chuyển`, `da xac nhan`...) khi cập nhật trực tiếp trong CSDL SQL Server.
+- Cung cấp sẵn script mẫu `sql/07-test-order-statuses.sql` để dễ dàng đổi trạng thái đơn hàng trong database và quan sát kết quả lọc trên giao diện.
+
 

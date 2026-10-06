@@ -107,7 +107,10 @@
         💡 <strong>Lưu ý nhận hàng COD:</strong> Quý khách vui lòng chú ý điện thoại từ nhân viên giao hàng và chuẩn bị sẵn số tiền mặt chính xác khi nhận bưu phẩm. Quý khách hoàn toàn được quyền mở hộp đồng kiểm trước khi thanh toán tiền mặt.
     </div>
 
-    <div style="margin-top: 32px; display: flex; justify-content: center; gap: 16px;">
+    <div style="margin-top: 32px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        <a href="${pageContext.request.contextPath}/orders" class="button button-outline" style="padding-inline: 24px;">
+            📦 Xem lịch sử đơn hàng
+        </a>
         <a href="${pageContext.request.contextPath}/home" class="button button-primary" style="padding-inline: 28px;">
             &larr; Tiếp tục mua sắm
         </a>

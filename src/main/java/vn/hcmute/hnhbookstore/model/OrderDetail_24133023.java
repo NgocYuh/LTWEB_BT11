@@ -13,6 +13,7 @@ public final class OrderDetail_24133023 implements Serializable {
     private int quantity;
     private BigDecimal unitPrice;
     private BigDecimal subtotal;
+    private String coverImage;
 
     public OrderDetail_24133023() {
     }
@@ -82,5 +83,13 @@ public final class OrderDetail_24133023 implements Serializable {
 
     public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
     }
 }

@@ -12,7 +12,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class OrderDao_24133023 {
 
@@ -163,10 +165,11 @@ public final class OrderDao_24133023 {
 
     public List<OrderDetail_24133023> findDetailsByOrderId(int orderId) throws SQLException {
         String sql = """
-            SELECT detail_id, order_id, bookid, book_title, quantity, unit_price, subtotal
-            FROM dbo.order_details
-            WHERE order_id = ?
-            ORDER BY detail_id ASC
+            SELECT d.detail_id, d.order_id, d.bookid, d.book_title, d.quantity, d.unit_price, d.subtotal, b.cover_image
+            FROM dbo.order_details d
+            LEFT JOIN dbo.books b ON b.bookid = d.bookid
+            WHERE d.order_id = ?
+            ORDER BY d.detail_id ASC
             """;
         List<OrderDetail_24133023> list = new ArrayList<>();
         try (Connection conn = ConnectionFactory_24133023.open();
@@ -182,11 +185,84 @@ public final class OrderDao_24133023 {
                     d.setQuantity(rs.getInt("quantity"));
                     d.setUnitPrice(rs.getBigDecimal("unit_price"));
                     d.setSubtotal(rs.getBigDecimal("subtotal"));
+                    d.setCoverImage(rs.getString("cover_image"));
                     list.add(d);
                 }
             }
         }
         return list;
+    }
+
+    public List<Order_24133023> findOrders(Integer userId, String statusFilter) throws SQLException {
+        String sql = (userId != null)
+                ? "SELECT order_id, user_id, customer_name, phone, shipping_address, note, total_amount, payment_method, status, created_at FROM dbo.orders WHERE user_id = ? ORDER BY order_id DESC"
+                : "SELECT order_id, user_id, customer_name, phone, shipping_address, note, total_amount, payment_method, status, created_at FROM dbo.orders ORDER BY order_id DESC";
+
+        List<Order_24133023> allOrders = new ArrayList<>();
+        try (Connection conn = ConnectionFactory_24133023.open();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (userId != null) {
+                stmt.setInt(1, userId);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    allOrders.add(mapOrder(rs));
+                }
+            }
+        }
+
+        // Attach details to each order
+        for (Order_24133023 o : allOrders) {
+            o.setItems(findDetailsByOrderId(o.getOrderId()));
+        }
+
+        String targetKey = Order_24133023.normalizeStatusKey(statusFilter);
+        if ("ALL".equalsIgnoreCase(targetKey)) {
+            return allOrders;
+        }
+
+        List<Order_24133023> filtered = new ArrayList<>();
+        for (Order_24133023 o : allOrders) {
+            if (targetKey.equalsIgnoreCase(o.getStatusKey())) {
+                filtered.add(o);
+            }
+        }
+        return filtered;
+    }
+
+    public Map<String, Integer> countOrdersByStatus(Integer userId) throws SQLException {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        counts.put("ALL", 0);
+        counts.put("NEW", 0);
+        counts.put("CONFIRMED", 0);
+        counts.put("PREPARING", 0);
+        counts.put("SHIPPING", 0);
+        counts.put("DELIVERING", 0);
+        counts.put("DELIVERED", 0);
+        counts.put("CANCELLED", 0);
+        counts.put("RETURNED", 0);
+
+        String sql = (userId != null)
+                ? "SELECT status FROM dbo.orders WHERE user_id = ?"
+                : "SELECT status FROM dbo.orders";
+
+        try (Connection conn = ConnectionFactory_24133023.open();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (userId != null) {
+                stmt.setInt(1, userId);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    counts.put("ALL", counts.get("ALL") + 1);
+                    String rawStatus = rs.getString("status");
+                    String key = Order_24133023.normalizeStatusKey(rawStatus);
+                    if (counts.containsKey(key)) {
+                        counts.put(key, counts.get(key) + 1);
+                    }
+                }
+            }
+        }
+        return counts;
     }
 
     private Order_24133023 mapOrder(ResultSet rs) throws SQLException {
